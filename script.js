@@ -5,12 +5,38 @@ const list = document.querySelector('#task-list');
 
 // 读取上次保存的任务；第一次打开时，从空列表开始。
 const savedTasks = localStorage.getItem('three-things-tasks');
-const tasks = savedTasks ? JSON.parse(savedTasks) : [];
+const storedTasks = savedTasks ? JSON.parse(savedTasks) : [];
+
+// 旧版任务只有文字；新版同时记录文字和是否完成。
+const tasks = storedTasks.map(function (task) {
+  return typeof task === 'string' ? { text: task, done: false } : task;
+});
+
+function saveTasks() {
+  localStorage.setItem('three-things-tasks', JSON.stringify(tasks));
+}
 
 // 把一件任务显示到页面上。
 function showTask(task) {
   const item = document.createElement('li');
-  item.textContent = task;
+  const label = document.createElement('label');
+  const checkbox = document.createElement('input');
+  checkbox.type = 'checkbox';
+  checkbox.checked = task.done;
+
+  const text = document.createElement('span');
+  text.textContent = task.text;
+  text.style.textDecoration = task.done ? 'line-through' : 'none';
+
+  checkbox.addEventListener('change', function () {
+    task.done = checkbox.checked;
+    text.style.textDecoration = task.done ? 'line-through' : 'none';
+    saveTasks();
+  });
+
+  label.appendChild(checkbox);
+  label.appendChild(text);
+  item.appendChild(label);
   list.appendChild(item);
 }
 
@@ -19,16 +45,17 @@ tasks.forEach(showTask);
 
 // 点击按钮时，执行大括号里的步骤。
 button.addEventListener('click', function () {
-  const task = input.value.trim();
+  const taskText = input.value.trim();
 
   // 空白内容不添加到列表。
-  if (task === '') {
+  if (taskText === '') {
     return;
   }
 
   // 更新任务数组，并将它保存到浏览器中。
+  const task = { text: taskText, done: false };
   tasks.push(task);
-  localStorage.setItem('three-things-tasks', JSON.stringify(tasks));
+  saveTasks();
   showTask(task);
 
   input.value = '';
