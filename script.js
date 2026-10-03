@@ -34,9 +34,23 @@ function showTask(task) {
     saveTasks();
   });
 
+  const deleteButton = document.createElement('button');
+  deleteButton.type = 'button';
+  deleteButton.textContent = '删除';
+  deleteButton.setAttribute('aria-label', '删除任务：' + task.text);
+
+  deleteButton.addEventListener('click', function () {
+    // 从数据中删除这件任务，再保存，并移除页面上的这一行。
+    const index = tasks.indexOf(task);
+    tasks.splice(index, 1);
+    saveTasks();
+    item.remove();
+  });
+
   label.appendChild(checkbox);
   label.appendChild(text);
   item.appendChild(label);
+  item.appendChild(deleteButton);
   list.appendChild(item);
 }
 
